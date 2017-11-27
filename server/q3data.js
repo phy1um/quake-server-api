@@ -67,6 +67,10 @@ ServerData.prototype.getDocument = function(key) {
 	else return this.data[key];
 }
 
+ServerData.prototype.getServers = function() {
+	return this.data;
+}
+
 
 function ServerData(ipList) {
 	this.ipList = ipList;
@@ -137,6 +141,6 @@ function updateData (ip, port, rules, players) {
 	doc.rules = rules;
 	doc.filteredPlayers = {};
 	q3json.updateServerInfo(doc);
-	console.dir(doc);
+//	console.dir(doc);
 
 }

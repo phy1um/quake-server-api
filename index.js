@@ -33,11 +33,13 @@ setInterval(() => {
 
 routes.get("/", (req, res, next) => {
 
+	console.log("MATCHING");
 	var match = Matcher.fromParams(req.params);
-	var output = matcher.matchOn(serverData.getData());
+	var output = match.matchOn(serverData.getServers());
 	res.json(output);
 
 });
 
 
 app.use("/", routes);
+app.listen(8800);

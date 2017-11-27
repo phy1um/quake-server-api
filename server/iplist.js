@@ -2,7 +2,6 @@
 function StaticIpList(array) {
 	// verify elements of array are "ip:port" pairs!
 	this.array = array;
-	console.log(array);
 }
 
 StaticIpList.prototype.refresh = function() {

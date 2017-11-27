@@ -2,8 +2,8 @@
 function Matcher() {
 	this.nameFilter = [];
 	this.regionFilter = [];
-	this.full = "yes";
-	this.empty = "yes";
+	this.full = true;
+	this.empty = true;
 	this.modeFilter = [];
 	this.gameFilter = [];
 	this.errorFlag = false;
@@ -58,29 +58,43 @@ Matcher.prototype.setMatchEmpty = function(b) {
 
 Matcher.prototype.matchOn = function(serverList) {
 	var match = [];
-	for (var server in serverList) {
+	console.dir(serverList);
+	for(let key in serverList) {
+		let server = serverList[key];
+		console.log("MATCHING SERVER~~");
+		console.dir(server);
+		console.dir(this);
 		if(
-			((server.rules.playerCount == 0) == this.empty) 
-			&&((server.rules.playerCount == server.rules.playerMax
-				== this.full)) 
-			&&(this.nameFilter.length > 0 ? true : 
-				doesContainPart(this.nameFilter, 
-					server.info.serverName))
-			&&(this.regionFilter.length > 0 ? true :
-				doesContain(this.regionFilter, 
-					server.location.countryCode))
-			&&(this.modeFilter.length > 0 ? true :
-				doesContain(this.modeFilter,
-					server.info.gameTypeShort))
-			&&(this.gameFilter.length > 0 ? true :
-				doesContain(this.gameFilter,
-					server.info.gameDir))
-		) {
-			match.append(server);
+		 true
+		 //((server.rules.players == 0) == this.empty) 
+		 //&&((server.rules.players==server.rules.maxPlayers)
+		 //  && this.full)
+		 &&(this.nameFilter.length <= 0 ? true : 
+		  doesContainPart(this.nameFilter, server.info.serverName))
+		 &&(this.regionFilter.length <= 0 ? true :
+		  doesContain(this.regionFilter, server.location.countryCode))
+		 &&(this.modeFilter.length <= 0 ? true :
+		  doesContain(this.modeFilter, server.info.gameTypeShort))
+		 &&(this.gameFilter.length <= 0 ? true :
+		  doesContain(this.gameFilter, server.info.gameDir))) 
+		{
+			match.push(server);
 		}
 	}
-	return match;
+	return {
+		"retrievalDate": "foo",
+		"timestamp": 1234,
+		"serverCount": match.length,
+		"servers":match
+	};
 }
+
+
+module.exports = {
+	fromParams: function(params) {
+		return new Matcher();
+	}
+};
 
 // ~~~~~~~~~~~~~~~~~~~
 // internal functions
