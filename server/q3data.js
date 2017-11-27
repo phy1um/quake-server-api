@@ -3,6 +3,13 @@ const dgram = require('dgram');
 const path = require('path');
 const q3json = require(path.resolve(__dirname, "./q3json.js"));
 
+var OOB = Buffer.alloc(4, 0xff);
+var getStatusMsg = Buffer.from("getstatus");
+getStatusMsg = Buffer.concat([OOB, getStatusMsg], OOB.length + 
+	getStatusMsg.length);
+var getInfoMsg = Buffer.from("getinfo");
+getInfoMsg = Buffer.concat([OOB, getInfoMsg], OOB.length + getInfoMsg.length);
+
 /**
  * Class: ServerData
  * Represents data polled from servers
@@ -76,12 +83,36 @@ ServerData.prototype.processMessage = function(msg, rinfo) {
  */
 ServerData.prototype.updateData = function(ip, port, rules, players) {
 	var key = ip + ":" + port;
-	var doc = this.fetch(key);
+	var doc = this.getDocument(key);
 	updateServerDataInfo(doc, rules);
 	doc.players = players;
 	doc.rules = rules;
 	doc.filteredPlayers = {};
 	doc.location = {"countryCode":getCountryCode(rules[".Location"])};
+}
+
+
+/**
+ * Iterate over all server documents we contain
+ *
+ */
+ServerData.prototype.serverIterate = function*() {
+	for (key in this.data) {
+		yield this.data[key];
+	}
+}
+
+
+/**
+ * Get a document for a given key - either existing document or {}
+ */
+ServerData.prototype.getDocument = function(key) {
+	if (! (key in this.data) ) {
+		var o = {}
+		this.data[key] = o;
+		return o;
+	}
+	else return this.data[key];
 }
 
 // Exports..
@@ -93,3 +124,6 @@ var data = {
 
 	
 };
+
+
+module.exports = data;
