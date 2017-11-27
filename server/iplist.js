@@ -1,6 +1,8 @@
 
 function StaticIpList(array) {
+	// verify elements of array are "ip:port" pairs!
 	this.array = array;
+	console.log(array);
 }
 
 StaticIpList.prototype.refresh = function() {
@@ -8,9 +10,11 @@ StaticIpList.prototype.refresh = function() {
 }
 
 StaticIpList.prototype.foreach = function(cb) {
-	for(var li in this.array) {
-		var elem = li.split(":");
-		cb(elem[0], elem[1]);
+	console.log(this.array);
+	for(let i = 0; i < this.array.length; i++) {
+		let elem = this.array[i].split(":");
+		console.log(elem);
+		cb(elem[0], parseInt(elem[1]));
 	}
 }
 

@@ -63,16 +63,16 @@ Matcher.prototype.matchOn = function(serverList) {
 			((server.rules.playerCount == 0) == this.empty) 
 			&&((server.rules.playerCount == server.rules.playerMax
 				== this.full)) 
-			&&(this.nameFilter.length() > 0 ? true : 
+			&&(this.nameFilter.length > 0 ? true : 
 				doesContainPart(this.nameFilter, 
 					server.info.serverName))
-			&&(this.regionFilter.length() > 0 ? true :
+			&&(this.regionFilter.length > 0 ? true :
 				doesContain(this.regionFilter, 
 					server.location.countryCode))
-			&&(this.modeFilter.length() > 0 ? true :
+			&&(this.modeFilter.length > 0 ? true :
 				doesContain(this.modeFilter,
 					server.info.gameTypeShort))
-			&&(this.gameFilter.length() > 0 ? true :
+			&&(this.gameFilter.length > 0 ? true :
 				doesContain(this.gameFilter,
 					server.info.gameDir))
 		) {

@@ -10,22 +10,24 @@ module.exports = {
 				rules[i] = "RANGE ERROR";
 			}
 		}
+		return out;
 	},
 	updateServerInfo: function(serverDoc) {
 		serverDoc.info = {};
-		serverDoc.info.protocol = -1;
+		serverDoc.info.protocol = serverDoc.rules.protocol;
 		serverDoc.info.serverName = serverDoc.rules.sv_hostname;
 		serverDoc.info.map = serverDoc.rules.mapname;
-		serverDoc.info.gameDir = XXX
-		serverDoc.info.game = XXX
-		serverDoc.info.gameTypeShort = XXX
-		serverDoc.info.gameTypeFull = XXX
-		serverDoc.info.players = serverDoc.players.length();
-		serverDoc.info.maxPlayers = serverDoc.rules.sv_maxClients;
+		serverDoc.info.gameDir = serverDoc.rules.gamename; 
+		serverDoc.info.game = serverDoc.rules.mode_current; 
+		serverDoc.info.gameTypeShort = serverDoc.rules.mode_current;
+		serverDoc.info.gameTypeFull = serverDoc.rules.mode_current;
+		serverDoc.info.players = serverDoc.players.length;
+		serverDoc.info.maxPlayers = serverDoc.rules.sv_maxclients;
 		serverDoc.info.bots = 0;
-		serverDoc.info.serverType = XXX
-		serverDoc.info.serverOS = XXX
-		serverDoc.info["private"] = XXX
-		serverDoc.info.serverVersion= XXX
+		vs = serverDoc.rules.version.split(" ");
+		serverDoc.info.serverType = vs[0];
+		serverDoc.info.serverOS = vs[2];
+		serverDoc.info["private"] = (serverDoc.rules.g_needpass == "1")
+		serverDoc.info.serverVersion= vs[1];
 	}
 };

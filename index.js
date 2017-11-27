@@ -15,11 +15,12 @@ console.log("Starting routes for Server service");
 var routes = Express.Router();
 
 // we are testing with a list of static ips
-var list = ["192.168.1.15:9760", "oafps.com:71960"];
+var list = ["192.168.1.15:27960", "oafps.com:27961"];
 // our tables has to have a list to read from, which can be updated
 var ips = IpList.fromList(list);
 // create serverdata from our ip list (ping each ip, process results..)
 var serverData = ServerData.from(ips);
+serverData.update();
 
 setInterval(() => {
 		ips.refresh();
@@ -39,4 +40,4 @@ routes.get("/", (req, res, next) => {
 });
 
 
-app.use(routes, "/");
+app.use("/", routes);

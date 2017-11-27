@@ -19,20 +19,7 @@ getInfoMsg = Buffer.concat([OOB, getInfoMsg], OOB.length + getInfoMsg.length);
  *  We do not track if a server polled never responds and should be
  *  treated as unavailible.
  */
-function ServerData(ipList) {
-	this.ipList = ipList;
-	this.lastUpdate = -1;
-	this.data = {};
-	this.socket = dgram.createSocket('udp4');
-	this.socket.on('error', 
-		(err) => {
-			console.error("Error in socket: ");
-			console.error(this.socket);
-		}
-	);
-	this.socket.on('message', this.processMessage);
 
-}
 
 /**
  * Poll the server ip list, and send requests to each server to get their info
@@ -55,41 +42,6 @@ ServerData.prototype.update = function() {
 };
 
 
-/**
- * Handle incoming responses from servers, parse the lines of data and pass off
- *  handling to other functions.
- * TODO: Simple verification that input is from a Q3 server
- */
-ServerData.prototype.processMessage = function(msg, rinfo) {
-	console.log(msg);
-	var lines = msg.toString().split("\n");
-	var serverRules = q3json.parseStatusBody(lines[1]);
-	var playerList = [];
-	// lines 2 -> end are player info
-	for(let i = 2; i < lines.length; i++) {
-		var playerInfo = lines[i].split(" ");
-		playerList.push({name:playerInfo[2], 
-			score:parseInt(playerInfo[0])});
-	}
-	// update our in memory "database"
-	this.updateData(rinfo.address, rinfo.port, serverRules, playerList);
-};
-
-
-/**
- * Update our in-memeory storage of server info
- * TODO: Consider making this nicer than just some array structure -
- *  is Redis overkill?
- */
-ServerData.prototype.updateData = function(ip, port, rules, players) {
-	var key = ip + ":" + port;
-	var doc = this.getDocument(key);
-	updateServerDataInfo(doc, rules);
-	doc.players = players;
-	doc.rules = rules;
-	doc.filteredPlayers = {};
-	doc.location = {"countryCode":getCountryCode(rules[".Location"])};
-}
 
 
 /**
@@ -115,6 +67,26 @@ ServerData.prototype.getDocument = function(key) {
 	else return this.data[key];
 }
 
+
+function ServerData(ipList) {
+	this.ipList = ipList;
+	this.lastUpdate = -1;
+	this.data = {};
+	this.socket = dgram.createSocket('udp4');
+	this.socket.on('error', 
+		(err) => {
+			console.error("Error in socket: ");
+			console.error(this.socket);
+		}
+	);
+	this.socket.on('message', (msg, rinfo) => {
+		processMessage.call(this, msg, rinfo);
+	});
+	this.socket.parSvData= this; 
+	console.dir(this.socket);
+
+}
+
 // Exports..
 var data = {
 	// Export a simple constructor
@@ -127,3 +99,44 @@ var data = {
 
 
 module.exports = data;
+
+
+/**
+ * Handle incoming responses from servers, parse the lines of data and pass off
+ *  handling to other functions.
+ * TODO: Simple verification that input is from a Q3 server
+ */
+function processMessage(msg, rinfo) {
+	console.log(msg);
+	var lines = msg.toString().split("\n");
+	var serverRules = q3json.parseStatusBody(lines[1]);
+	var playerList = [];
+	// lines 2 -> end are player info
+	for(let i = 2; i < lines.length; i++) {
+		if(lines[i].length > 1) {
+			var playerInfo = lines[i].split(" ");
+			playerList.push({name:playerInfo[2], 
+				score:parseInt(playerInfo[0])});
+		}
+	}
+	// update our in memory "database"
+	updateData.call(this, rinfo.address, rinfo.port, serverRules, playerList);
+};
+
+
+/**
+ * Update our in-memeory storage of server info
+ * TODO: Consider making this nicer than just some array structure -
+ *  is Redis overkill?
+ */
+function updateData (ip, port, rules, players) {
+	var key = ip + ":" + port;
+	var doc = this.getDocument(key);
+	//updateServerDataInfo(doc, rules);
+	doc.players = players;
+	doc.rules = rules;
+	doc.filteredPlayers = {};
+	q3json.updateServerInfo(doc);
+	console.dir(doc);
+
+}
