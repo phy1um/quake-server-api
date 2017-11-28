@@ -122,7 +122,6 @@ module.exports = data;
  * TODO: Simple verification that input is from a Q3 server
  */
 function processMessage(msg, rinfo) {
-	console.log(msg);
 	var lines = msg.toString().split("\n");
 	var serverRules = q3json.parseStatusBody(lines[1]);
 	var playerList = [];
@@ -150,6 +149,8 @@ function updateData (ip, port, rules, players) {
 	//updateServerDataInfo(doc, rules);
 	doc.players = players;
 	doc.rules = rules;
+	doc.address = ip;
+	doc.port = port;
 	doc.filteredPlayers = {};
 	q3json.updateServerInfo(doc);
 //	console.dir(doc);

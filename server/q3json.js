@@ -17,9 +17,9 @@ module.exports = {
 		serverDoc.info.protocol = serverDoc.rules.protocol;
 		serverDoc.info.serverName = serverDoc.rules.sv_hostname;
 		serverDoc.info.map = serverDoc.rules.mapname;
-		serverDoc.info.gameDir = serverDoc.rules.gamename; 
+		serverDoc.info.gameDir = serverDoc.rules.gamename.toUpperCase(); 
 		serverDoc.info.game = serverDoc.rules.mode_current; 
-		serverDoc.info.gameTypeShort = serverDoc.rules.mode_current;
+		serverDoc.info.gameTypeShort = "1v1";
 		serverDoc.info.gameTypeFull = serverDoc.rules.mode_current;
 		serverDoc.info.players = serverDoc.players.length;
 		serverDoc.info.maxPlayers = serverDoc.rules.sv_maxclients;
@@ -29,5 +29,19 @@ module.exports = {
 		serverDoc.info.serverOS = vs[2];
 		serverDoc.info["private"] = (serverDoc.rules.g_needpass == "1")
 		serverDoc.info.serverVersion= vs[1];
+
+		serverDoc.location = {};
+		if(serverDoc.rules[".Location"]) {
+			serverDoc.location.countryName = 
+				serverDoc.rules[".Location"];
+		}
+		else  {
+			serverDoc.location.countryName = "unknown";
+		}
+
+		serverDoc.location.countryCode = 
+			serverDoc.location.countryName.substring(0,2)
+			.toUpperCase();
+		serverDoc.location.state = "N/A";
 	}
 };

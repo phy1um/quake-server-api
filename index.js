@@ -15,7 +15,7 @@ console.log("Starting routes for Server service");
 var routes = Express.Router();
 
 // we are testing with a list of static ips
-var list = ["192.168.1.15:27960", "oafps.com:27961"];
+var list = ["192.168.1.8:27960", "oafps.com:27961"];
 // our tables has to have a list to read from, which can be updated
 var ips = IpList.fromList(list);
 // create serverdata from our ip list (ping each ip, process results..)
@@ -34,12 +34,11 @@ setInterval(() => {
 routes.get("/", (req, res, next) => {
 
 	console.log("MATCHING");
-	var match = Matcher.fromParams(req.params);
+	var match = Matcher.fromParams(req.query);
 	var output = match.matchOn(serverData);
 	res.json(output);
 
 });
-
 
 app.use("/", routes);
 app.listen(8800);

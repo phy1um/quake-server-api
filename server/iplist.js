@@ -9,10 +9,8 @@ StaticIpList.prototype.refresh = function() {
 }
 
 StaticIpList.prototype.foreach = function(cb) {
-	console.log(this.array);
 	for(let i = 0; i < this.array.length; i++) {
 		let elem = this.array[i].split(":");
-		console.log(elem);
 		cb(elem[0], parseInt(elem[1]));
 	}
 }

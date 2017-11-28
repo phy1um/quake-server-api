@@ -8,25 +8,33 @@ function Matcher() {
 	this.gameFilter = [];
 	this.errorFlag = false;
 	this.errorMsg = "No error";
+	this.error = (s) => {
+		throw new Error(s);
+	}
 }
 
 Matcher.prototype.addNameFilter = function(f) {
-	// verify is string
-	this.nameFilter.append(f);
+	verifyStringAndAppend(this, f, this.nameFilter);
 }
 
 Matcher.prototype.addRegionFilter = function(f) {
-	// verify f is string AND f a valid code
-	this.regionFilter.append(f);
+	verifyStringAndAppend(this, f.toUpperCase(), this.regionFilter);
 }
 
-Matcher.prototype.setModeFilter = function(f) {
-	// verify is string
-	if( typeof f != "string" ) {
-		this.error("Paramter to setModeFilter was not a string");
+Matcher.prototype.addModeFilter = function(f) {
+	verifyStringAndAppend(this, f.toUpperCase(), this.modeFilter);
+}
+
+Matcher.prototype.addGameFilter = function(f) {
+	verifyStringAndAppend(this, f.toUpperCase(), this.gameFilter);
+}
+
+function verifyStringAndAppend(m, s, arr) {
+	if(typeof s !== "string") {
+		m.error("Parameter was not a string");
 	}
 	else {
-		this.modeFilter.append(f);
+		arr.push(s);
 	}
 }
 
@@ -58,40 +66,78 @@ Matcher.prototype.setMatchEmpty = function(b) {
 
 Matcher.prototype.matchOn = function(serverData) {
 	var match = [];
-	console.dir(serverData);
 	for(let server of serverData.serverIterate()) {
-		console.log("MATCHING SERVER~~");
+		serverFull=(server.info
+			&&(server.info.players == server.info.maxPlayers));
+	/*	console.log("MATCHING SERVER~~");
 		console.dir(server);
-		console.dir(this);
+		console.dir(this);*/
 		if(
-		 true
-		 //((server.rules.players == 0) == this.empty) 
-		 //&&((server.rules.players==server.rules.maxPlayers)
-		 //  && this.full)
-		 &&(this.nameFilter.length <= 0 ? true : 
+		 ((server.info.players == 0) == this.empty) 
+		 && ( serverFull == this.full || this.full && !serverFull)
+		 &&(server.info && this.nameFilter.length <= 0 ? true : 
 		  doesContainPart(this.nameFilter, server.info.serverName))
-		 &&(this.regionFilter.length <= 0 ? true :
+		 &&(server.location && this.regionFilter.length <= 0 ? true :
 		  doesContain(this.regionFilter, server.location.countryCode))
-		 &&(this.modeFilter.length <= 0 ? true :
+		 &&(server.info && this.modeFilter.length <= 0 ? true :
 		  doesContain(this.modeFilter, server.info.gameTypeShort))
-		 &&(this.gameFilter.length <= 0 ? true :
+		 &&(server.info && this.gameFilter.length <= 0 ? true :
 		  doesContain(this.gameFilter, server.info.gameDir))) 
 		{
 			match.push(server);
 		}
 	}
+	let d = new Date();
 	return {
-		"retrievalDate": "foo",
-		"timestamp": 1234,
+		"retrievalDate": d,
+		"timestamp": parseInt(d / 1000),
 		"serverCount": match.length,
 		"servers":match
 	};
 }
 
 
+// represent the mapping of parameters to function calls in data
+const matcherStringComponents = { 
+	"name": Matcher.prototype.addNameFilter,
+	"region": Matcher.prototype.addRegionFilter,
+	"mode": Matcher.prototype.addModeFilter,
+	"game": Matcher.prototype.addGameFilter
+};
 module.exports = {
 	fromParams: function(params) {
-		return new Matcher();
+		console.log("PARAMS =>>>");
+		console.dir(params);
+		let m = new Matcher();
+		for(let key in params) {
+			if(key === "empty") {
+				m.setMatchEmpty(params.empty);
+			}
+			else if(key === "full") {
+				m.setMatchFull(params.full);
+			}
+			else if(matcherStringComponents[key]) {
+				if(typeof params[key] === "string") {
+					let s = params[key].split(",");
+					if(s.length <= 1) {
+						matcherStringComponents[key]
+							.call(m, params[key]);
+						continue;
+					}
+					else {
+						console.log("SPLIT: ");
+						console.dir(s);
+						params[key] = s;
+					}
+				}
+				for(let n in params[key]) {
+					matcherStringComponents[key].call(
+						m, params[key][n]);
+				}
+			}
+		}
+
+		return m;
 	}
 };
 
@@ -99,8 +145,8 @@ module.exports = {
 // internal functions
 //
 function doesContain(filter, target) {
-	for(var f in filter) {
-		if(f === target) {
+	for(let i = 0; i < filter.length; i++) {
+		if(filter[i] === target) {
 			return true;
 		}
 	}
@@ -108,8 +154,8 @@ function doesContain(filter, target) {
 }
 
 function doesContainPart(filter, target) {
-	for(var f in filter) {
-		if(target.includes(f)) {
+	for(let i = 0; i < filter.length; i++) {
+		if(target.includes(filter[i])) {
 			return true;
 		}
 	}
