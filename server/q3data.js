@@ -3,6 +3,11 @@ const dgram = require('dgram');
 const path = require('path');
 const q3json = require(path.resolve(__dirname, "./q3json.js"));
 
+const STAT_READY = 0;
+const STAT_UPDATING = 1;
+const STAT_ERR = -1;
+const STAT_BUSY = 2;
+
 var OOB = Buffer.alloc(4, 0xff);
 var getStatusMsg = Buffer.from("getstatus");
 getStatusMsg = Buffer.concat([OOB, getStatusMsg], OOB.length + 
@@ -26,19 +31,24 @@ getInfoMsg = Buffer.concat([OOB, getInfoMsg], OOB.length + getInfoMsg.length);
  * These messages are handled by prototype.processMessage(msg, rinfo)
  */
 ServerData.prototype.update = function() {
+	if(!this.stat == STAT_READY) {
+		console.error("Called update on busy server data object");
+		return;
+	}
+	this.stat = STAT_UPDATING;
 	// iterate over list container object
-	this.ipList.foreach( 
-		(ip, port) => {
+	this.ipList.foreach( (ip, port) => {
 		// send "getstatus" request to a q3 server
-		this.socket.send(getStatusMsg, 0, getStatusMsg.length, port, ip, 
+		this.socket.send(getStatusMsg,0,getStatusMsg.length,port,ip,
 			(err) => {
-				if(err) console.error("Could not connect to " + 
+				if(err) console.error("Could not connect to " +
 					ip + ":" + port);
 			}
 		);
-		}
+	}
 	);
 	this.lastUpdate = Math.floor(new Date() / 1000);
+	this.stat = STAT_READY;
 };
 
 
@@ -87,6 +97,7 @@ function ServerData(ipList) {
 		processMessage.call(this, msg, rinfo);
 	});
 	this.socket.parSvData= this; 
+	this.stat = STAT_READY;
 	console.dir(this.socket);
 
 }

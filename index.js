@@ -35,7 +35,7 @@ routes.get("/", (req, res, next) => {
 
 	console.log("MATCHING");
 	var match = Matcher.fromParams(req.params);
-	var output = match.matchOn(serverData.getServers());
+	var output = match.matchOn(serverData);
 	res.json(output);
 
 });

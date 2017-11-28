@@ -56,11 +56,10 @@ Matcher.prototype.setMatchEmpty = function(b) {
 	}
 }
 
-Matcher.prototype.matchOn = function(serverList) {
+Matcher.prototype.matchOn = function(serverData) {
 	var match = [];
-	console.dir(serverList);
-	for(let key in serverList) {
-		let server = serverList[key];
+	console.dir(serverData);
+	for(let server of serverData.serverIterate()) {
 		console.log("MATCHING SERVER~~");
 		console.dir(server);
 		console.dir(this);
