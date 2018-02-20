@@ -52,17 +52,20 @@ ServerData.prototype.update = function() {
 };
 
 
-
-
+function clone(data) {
+	return JSON.parse(JSON.stringify(data));
+};
 /**
- * Iterate over all server documents we contain
- *
+ * Get a "working copy" array of all servers currently in this ServerData
  */
-ServerData.prototype.serverIterate = function*() {
-	for (key in this.data) {
-		yield this.data[key];
+ServerData.prototype.getWorkingArray = function() {
+	var out = [];
+	for(let key in this.data) {
+		let d = this.data[key];
+		out.push(clone(d));	
 	}
-}
+	return out;
+};
 
 
 /**

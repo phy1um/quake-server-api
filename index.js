@@ -41,4 +41,3 @@ routes.get("/", (req, res, next) => {
 });
 
 app.use("/", routes);
-app.listen(8800);
