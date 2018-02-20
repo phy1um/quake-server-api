@@ -37,8 +37,8 @@ const filter = {
 
 	// boolean spaghetti
 	noFull: function(e) {
-		return(e.info && e.info.players && e.info.maxPlayers 
-			&& (e.info.players < e.info.maxPlyaers));
+		return(e.info && e.info.players !== undefined && e.info.maxPlayers 
+			&& (e.info.players < e.info.maxPlayers));
 	},
 	noEmpty: function(e) {
 		return(e.info && e.info.players !== undefined
@@ -50,27 +50,33 @@ const filter = {
 			return !(filter(e));
 		}
 	},
-	or: function(e) {
-		let res = false;
-		for(let i = 0; i < arguments.length; i++) {
-			let f = arguments[i];
-			res = f(e);
-			if(res === true) {
-				return true;
+	or: function() {
+		let args = arguments;
+		return function(e) {
+			let res = false;
+			for(let i = 0; i < args.length; i++) {
+				let f = args[i];
+				res = f(e);
+				if(res === true) {
+					return true;
+				}
 			}
+			return false;
 		}
-		return false;
 	},
-	and: function(e) {
-		let res = true;
-		for(let i = 0; i < arguments.length; i++) {
-			let f = arguments[i];
-			res = f(e);
-			if(res === false) {
-				return false;
+	and: function() {
+		let args = arguments;
+		return function(e) {
+			let res = true;
+			for(let i = 0; i < args.length; i++) {
+				let f = args[i];
+				res = f(e);
+				if(res === false) {
+					return false;
+				}
 			}
+			return true;
 		}
-		return true;
 	}
 }
 
