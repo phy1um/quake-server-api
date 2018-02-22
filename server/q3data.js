@@ -101,7 +101,7 @@ function ServerData(ipList) {
 	});
 	this.socket.parSvData= this; 
 	this.stat = STAT_READY;
-	console.dir(this.socket);
+	//console.dir(this.socket);
 
 }
 

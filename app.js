@@ -10,6 +10,7 @@ const index = require('./routes/index');
 const iplist = require('./server/iplist');
 const serverdata = require('./server/q3data');
 const Matcher = require('./server/filter');
+const q3master = require('./server/q3master');
 
 
 var app = express();
@@ -37,12 +38,14 @@ var list = ["oafps.com:27961", "oafps.com:27962", "180.181.128.198:27961"];
 // our tables has to have a list to read from, which can be updated
 var ips = iplist.fromList(list);
 // create serverdata from our ip list (ping each ip, process results..)
+//let ips = q3master.fromMaster("master.quake3arena.com", "27950");
+//ips.refresh();
 var serverData = serverdata.from(ips);
 serverData.update();
 
 setInterval(() => {
 		ips.refresh();
-	}, 60000);
+	}, 6000);
 
 setInterval(() => {
 		serverData.update();

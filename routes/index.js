@@ -2,13 +2,24 @@
 const router = require('express').Router();
 
 router.get('/', function(req, res) {
-	res.render('index');
+	console.log("LOGGING GET");
+	try {
+		res.render('index');
+	}
+	catch(e) {
+		next(e);
+	}
 });
 
 router.get("/browser", function(req, res, next) {
-	let match = matcher.fromQuery(req.query);
-	let out = match.process();
-	res.render('browser', {"servers": out});
+	try {
+		let match = matcher.fromQuery(req.query);
+		let out = match.process();
+		res.render('browser', {"servers": out, "test": "foo"});
+	}
+	catch(e) {
+		next(e);
+	}
 });
 
 

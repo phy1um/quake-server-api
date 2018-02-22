@@ -1,0 +1,21 @@
+extends layout.pug
+
+block content
+	.browser
+		table#browser-table
+			tr
+				th Country
+				th Name
+				th Game
+				th Players
+				th Mode
+				th Map
+			
+			for server in servers
+				tr
+					td server.location
+					td server.info.serverName
+					td server.info.gameDir
+					td server.info.players
+					td server.info.gameTypeShort
+					td aerowalk
