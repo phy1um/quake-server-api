@@ -7,8 +7,17 @@ module.exports = { withServerData: function(serverData) {
 		try {
 			let match = matcher.fromQuery(req.query);
 			console.dir(req.query);
-			let out = match.process(serverData)
-			res.json({'servers': out});
+			let servers = match.process(serverData)
+			let date = new Date();
+			let out = {
+				retvievalDate: date,
+				timestamp: Math.floor(date/1000),
+				serverCount: servers.length,
+				failedCount: 0,
+				"servers": servers
+			};
+
+			res.json(out);
 		} catch(e) {
 			next(e);
 		}
@@ -17,6 +26,7 @@ module.exports = { withServerData: function(serverData) {
 	router.use(function(err, req, res, next) {
 		if(err) {
 			if(req.app.get('env') === 'development') {
+				console.error(err);
 				res.json({"error": err.message});
 			}
 			else {

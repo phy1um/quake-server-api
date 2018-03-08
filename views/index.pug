@@ -2,6 +2,8 @@ extends layout
 
 block scripts
 	script(src="/js/browser.js")
-
+	script function pageload() {QBROWSER.makeServerBrowser("container", "/api/list")}
 block content
 	#container
+
+

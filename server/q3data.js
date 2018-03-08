@@ -156,6 +156,14 @@ function updateData (ip, port, rules, players) {
 	doc.port = port;
 	doc.filteredPlayers = {};
 	q3json.updateServerInfo(doc);
+	let game = "Unknown";
+	if(doc.info.gameDir.toUpperCase() === "BASEQ3") {
+		game = "Quake 3";
+	}
+	else if(doc.info.gameDir.toUpperCase() === "CPMA") {
+		game = "CPMA";
+	}
+	doc.game = game;
 //	console.dir(doc);
 
 }

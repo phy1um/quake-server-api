@@ -1,3 +1,7 @@
+const path = require('path');
+const geoip = require(path.join(__dirname, "./geoip.js"));
+const country = require(path.join(__dirname, "./country.js"));
+
 module.exports = {
 	parseStatusBody: function(line) {
 		var out = {};
@@ -31,17 +35,38 @@ module.exports = {
 		serverDoc.info.serverVersion= vs[1];
 
 		serverDoc.location = {};
-		if(serverDoc.rules[".Location"]) {
-			serverDoc.location.countryName = 
-				serverDoc.rules[".Location"];
-		}
-		else  {
-			serverDoc.location.countryName = "unknown";
-		}
-
-		serverDoc.location.countryCode = 
-			serverDoc.location.countryName.substring(0,2)
-			.toUpperCase();
+		serverDoc.location.countryName = "unknown";
 		serverDoc.location.state = "N/A";
+		withLocationProperty(serverDoc.rules, (err, value) => {
+			if(err) { 
+				console.error(err);
+				return;
+			}
+			let parts = value.split(",");
+			for(let i = 0; i < parts.length; i++) {
+				let test = parts[i].trim();
+				if(country.isCountry(test)) {
+					serverDoc.location.countryName = test;
+					break;
+				}
+				else if(country.isUSState(test)) {
+					serverDoc.location.countryName = "United States";
+					serverDoc.location.state = test;
+					break;
+				}
+			}
+		});
+		serverDoc.location.countryCode = 
+			country.codeFromName(serverDoc.location.countryName);
 	}
 };
+
+
+function withLocationProperty(o, cb) {
+	for(let key in o) {
+		let i = key.toUpperCase().indexOf("LOCATION");
+		if(i >= 0) {
+			cb(undefined, o[key]);
+		}
+	}
+}
