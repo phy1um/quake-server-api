@@ -72,16 +72,15 @@ const list = [
 
 //const list = ["q3.vixterra.com:27960", "138.197.162.183:27960"];
 // our tables has to have a list to read from, which can be updated
-var ips = iplist.fromList(list);
+//var ips = iplist.fromList(list);
 // create serverdata from our ip list (ping each ip, process results..)
-//let ips = q3master.fromMaster("master.quake3arena.com", "27950");
-//ips.refresh();
+let ips = q3master.fromMaster("master.quake3arena.com", "27950");
 var serverData = serverdata.from(ips);
 serverData.update();
 
 setInterval(() => {
 		ips.refresh();
-	}, 6000);
+	}, 600000);
 
 setInterval(() => {
 		serverData.update();

@@ -56,8 +56,8 @@ function geolocate(ip, cb) {
 		}
 		if(body) {
 			const data = JSON.parse(body);
-			console.log("Got geolocation response");
-			console.dir(data);
+			//console.log("Got geolocation response");
+			//console.dir(data);
 			cb(undefined, {
 				countryName: data.country_name,
 				countryCode: data.country_code,

@@ -23,15 +23,16 @@ function Q3Master(ip, port) {
 	});
 	this.serverList = [];
 	this.lastUpdate = 0;
+	this.refresh();
 }
 
 Q3Master.prototype.refresh = function() {
 	let newList = [];
 	this.sock.on('message', (msg, rinfo) => {
-		const e = process(msg, rinfo);
-		newList.push(e);
+		process(msg, rinfo, newList);
+		console.log(`Newlist Size: ${newList.length}`);
 	});
-	console.log(serversMsg.toString());
+//	console.log(serversMsg.toString());
 	this.sock.send(serversMsg,0,serversMsg.length,this.port,this.ip,
 		(err) => {
 			if(err) {
@@ -46,27 +47,52 @@ Q3Master.prototype.refresh = function() {
 	);
 	this.lastUpdate = Math.floor(new Date() / 1000);
 	this.serverList = newList;
+
 };
 
 Q3Master.prototype.getServerArray = function() {
-	return JSON.parse(JSON.stringify(this.serverList));
+//	return JSON.parse(JSON.stringify(this.serverList));
+	return this.serverList;
 }
 
 Q3Master.prototype.foreach = function(cb) {
 	const arr = this.getServerArray();
 	for(let k in arr) {
-		let server = arr[k];
+		const server = arr[k];
 		cb(server.ip, server.port);
 	}
 };
 
 function binMessage(m) {
-	if(m) console.log("BINNING " + m);
+	//if(m) console.log("BINNING " + m);
 }
 
-function process(msg, rinfo) {
-	console.log(`${rinfo} -- ${msg}`);
-	return {};
+function process(msg, rinfo, list) {
+	const b = Buffer.from(msg);
+	const cmd = b.toString("utf8", 4, 22);
+	if(cmd !== "getserversResponse") {
+		throw new Error(`Invalid response command from Q3 master: ${cmd}`);
+	}
+///	console.log(cmd);
+	for(let i = 0; i < b.length; i++) {
+		if(b[i] === 0x5c) {
+			if(i+5 >= b.length) {
+				// validateEnd(b, i+1);
+				return;
+			}
+			const server = parseServer(b, i+1);
+			list.push(server);
+			i += 6;
+		}
+	}
+	return list;
+}
+
+function parseServer(b, start) {
+	const ipParts = [b[start], b[start+1], b[start+2], b[start+3]];
+	const ip = ipParts.join(".");
+	const port = (b[start+4] * (16*16)) + b[start+5];
+	return {ip: ip, port:port};
 }
 
 module.exports = {

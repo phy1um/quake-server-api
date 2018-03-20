@@ -1,13 +1,15 @@
+function testInfo(field, test) {
+	return function(e) {
+		if(e === undefined) return false;
+		if(e.info === undefined) return false;
+		if(e.info[field] === undefined) return false;
+		return (e.info[field] === test);
+	};
+}
+
 const filter = {
 	// test field in info
-	testInfo: function(field, test) {
-		return function(e) {
-			if(e === undefined) return false;
-			if(e.info === undefined) return false;
-			if(e.info[field] === undefined) return false;
-			return (e.info[field] === test);
-		}
-	},
+	testInfo: testInfo,
 	// special extension, not part of e.info!
 	withCountry: function(c) {
 		return function(e) {
@@ -16,13 +18,13 @@ const filter = {
 	},
 	// special cases of testInfo
 	withName: function(name) {
-		return this.testInfo("serverName", name);
+		return testInfo("serverName", name);
 	},
 	withGame: function(game) {
-		return this.testInfo("gameDir", game);
+		return testInfo("gameDir", game);
 	},
 	withMode: function(mode) {
-		return this.testInfo("gameTypeShort", mode);
+		return testInfo("gameTypeShort", mode);
 	},
 
 	// check if serverName _contains_ a value
@@ -75,6 +77,11 @@ const filter = {
 			let res = true;
 			for(let i = 0; i < args.length; i++) {
 				let f = args[i];
+				if(typeof f !== "function") {
+					console.log("Taking logical and with non-function:");
+					console.dir(args);
+					throw new Error("Could not take logical and");
+				}
 				res = f(e);
 				if(res === false) {
 					return false;
@@ -99,7 +106,7 @@ function makeComboFilter(parts, f) {
 	for(let i = 0; i < parts.length; i++) {
 		li.push(f(parts[i]));
 	}
-	return filter.and(li);
+	return filter.and(...li);
 }
 function fromQuery(q) {
 	let m = new Matcher();
