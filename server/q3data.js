@@ -1,6 +1,7 @@
 
 const dgram = require('dgram');
 const path = require('path');
+const locate = require(path.resolve(__dirname, "./locate.js"));
 const q3json = require(path.resolve(__dirname, "./q3json.js"));
 
 const STAT_READY = 0;
@@ -156,14 +157,25 @@ function updateData (ip, port, rules, players) {
 	doc.port = port;
 	doc.filteredPlayers = {};
 	q3json.updateServerInfo(doc);
-	let game = "Unknown";
+	if(doc.location === undefined) {
+		locate.findServer(doc, (err, loc) => {
+			if(err) {
+				console.error(err);
+				doc.location = locate.null;
+			}
+			else {
+				doc.location = loc;
+			}
+		});
+	}
 	if(doc.info.gameDir.toUpperCase() === "BASEQ3") {
-		game = "Quake 3";
+		doc.game = "Quake 3";
 	}
 	else if(doc.info.gameDir.toUpperCase() === "CPMA") {
-		game = "CPMA";
+		doc.game = "CPMA";
 	}
-	doc.game = game;
-//	console.dir(doc);
+	else {
+		game = doc.info.gameDir;
+	}
 
 }

@@ -143,10 +143,8 @@ describe("filter", function() {
 	describe("* Filter Logical AND", function() {
 		it("Should filter servers with mode mode2 AND game game2", function() {
 			let m = new match.Matcher();
-			m.addFilter(match.filters.and(
-				match.filters.withMode("mode2"),
-				match.filters.withGame("game1")
-			));
+			m.addFilter(match.filters.withMode("mode2"));
+			m.addFilter(match.filters.withGame("game1"));
 			let out = m.process(fakeServerData);
 			assert.deepEqual(out, [egServer2]);
 		});

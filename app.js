@@ -34,7 +34,7 @@ console.log("Starting routes for Server service");
 var routes = express.Router();
 
 // we are testing with a list of static ips
-var list = [
+const list = [
 	// oafps
 	"oafps.com:27961", "oafps.com:27962", "oafps.com:27963","oafps.com:27964",
 	// worried about 2pac
@@ -70,6 +70,7 @@ var list = [
 
 ];
 
+//const list = ["q3.vixterra.com:27960", "138.197.162.183:27960"];
 // our tables has to have a list to read from, which can be updated
 var ips = iplist.fromList(list);
 // create serverdata from our ip list (ping each ip, process results..)

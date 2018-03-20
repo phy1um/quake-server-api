@@ -11,7 +11,7 @@ const filter = {
 	// special extension, not part of e.info!
 	withCountry: function(c) {
 		return function(e) {
-			return (e.location && e.location === e);
+			return (e.location && e.location === c);
 		}
 	},
 	// special cases of testInfo
@@ -44,7 +44,7 @@ const filter = {
 		return(e.info && e.info.players !== undefined
 			&& e.info.players != 0);
 	},
-		// utility/composition functions
+	// utility/composition functions
 	not: function(filter) {
 		return function(e) {
 			return !(filter(e));
@@ -65,8 +65,13 @@ const filter = {
 		}
 	},
 	and: function() {
-		let args = arguments;
-		return function(e) {
+		let args = [...arguments];
+		if(args.length === 0) {
+			return function(e) {
+				return true;
+			}
+		}
+		else return function(e) {
 			let res = true;
 			for(let i = 0; i < args.length; i++) {
 				let f = args[i];
@@ -88,27 +93,51 @@ Matcher.prototype.addFilter = function(f) {
 	this.filters.push(f);
 };
 
+
+function makeComboFilter(parts, f) {
+	let li = [];
+	for(let i = 0; i < parts.length; i++) {
+		li.push(f(parts[i]));
+	}
+	return filter.and(li);
+}
 function fromQuery(q) {
 	let m = new Matcher();
 	if(q !== undefined) {
 		if(q.name) {
-			m.addFilter(filter.withName(q.name));
+			const and = makeComboFilter(q.name.split("+"), 
+						filter.withName);
+			m.addFilter(and);
 		}
 		if(q.game) {
-			m.addFilter(filter.withGame(q.game));
+			const and = makeComboFilter(q.game.split("+"),
+						filter.withGame);
+			m.addFilter(and);
 		}
 		if(q.mode) {
-			m.addFilter(filter.withMode(q.mode));
-		}
-		if(q.full === "no") {
-			m.addFilter(filter.noFull);
-		}
-		if(q.empty === "no") {
-			m.addFilter(filter.noEmpty);
+			const and = makeComboFilter(q.mode.split("+"),
+						filter.withMode);
+			m.addFilter(and);
 		}
 		if(q.country) {
-			m.addFilter(filter.withCountry(q.country));
+			const and = makeComboFilter(q.country.split("+"),
+						filter.withCountry);
+			m.addFilter(and);
+
 		}
+		if(q.full === "none") {
+			m.addFilter(filter.noFull);
+		}
+		else if(q.full === "only") {
+			m.addFilter(filter.not(filter.noFull));
+		}
+		if(q.empty === "none") {
+			m.addFilter(filter.noEmpty);
+		}
+		else if(q.empty === "only") {
+			m.addFilter(filter.not(filter.noEmpty));
+		}
+		
 	}
 	return m;
 }
@@ -116,23 +145,14 @@ function fromQuery(q) {
 
 Matcher.prototype.process = function(serverData) {
 	let servers = serverData.getWorkingArray();
-	let flags = Array(servers.length).fill(true);
-
-	// for each filter, ignore FALSE flags and update TRUE flags
-	for(let kf in this.filters) {
-		let filter = this.filters[kf];
-		for(let ks in servers) {
-			if(flags[ks]) {
-				flags[ks] = filter(servers[ks]);
-			}
-		}
-	}
-
-	// build an array for output from servers with their flag still set
+	// build a filter which is the  logical AND of filters in this matcher
+	let f = filter.and(...this.filters);
 	let out = [];
+
+	// build an output array from servers which match the filters
 	for(let ks in servers) {
-		if(flags[ks]) {
-			out.push(servers[ks]);		
+		if(f(servers[ks])) {
+			out.push(servers[ks]);
 		}
 	}
 
