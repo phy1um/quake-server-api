@@ -13,7 +13,7 @@ const filter = {
 	// special extension, not part of e.info!
 	withCountry: function(c) {
 		return function(e) {
-			return (e.location && e.location === c);
+			return (e.location && e.location.countryCode === c);
 		}
 	},
 	// special cases of testInfo
@@ -53,18 +53,28 @@ const filter = {
 		}
 	},
 	or: function() {
-		let args = arguments;
-		return function(e) {
-			let res = false;
-			for(let i = 0; i < args.length; i++) {
-				let f = args[i];
-				res = f(e);
-				if(res === true) {
-					return true;
-				}
-			}
-			return false;
-		}
+        let args = [...arguments];
+        if (args.length === 0) {
+            return function (e) {
+                return true;
+            }
+        }
+        else return function (e) {
+            let res = true;
+            for (let i = 0; i < args.length; i++) {
+                let f = args[i];
+                if (typeof f !== "function") {
+                    console.log("Taking logical and with non-function:");
+                    console.dir(args);
+                    throw new Error("Could not take logical and");
+                }
+                res = f(e);
+                if (res === true) {
+                    return true;
+                }
+            }
+            return false;
+        }
 	},
 	and: function() {
 		let args = [...arguments];
@@ -106,28 +116,28 @@ function makeComboFilter(parts, f) {
 	for(let i = 0; i < parts.length; i++) {
 		li.push(f(parts[i]));
 	}
-	return filter.and(...li);
+	return filter.or(...li);
 }
 function fromQuery(q) {
 	let m = new Matcher();
 	if(q !== undefined) {
 		if(q.name) {
-			const and = makeComboFilter(q.name.split("+"), 
+			const and = makeComboFilter(q.name.split("|"), 
 						filter.withName);
 			m.addFilter(and);
 		}
 		if(q.game) {
-			const and = makeComboFilter(q.game.split("+"),
+			const and = makeComboFilter(q.game.split("|"),
 						filter.withGame);
 			m.addFilter(and);
 		}
 		if(q.mode) {
-			const and = makeComboFilter(q.mode.split("+"),
+			const and = makeComboFilter(q.mode.split("|"),
 						filter.withMode);
 			m.addFilter(and);
 		}
 		if(q.country) {
-			const and = makeComboFilter(q.country.split("+"),
+			const and = makeComboFilter(q.country.split("|"),
 						filter.withCountry);
 			m.addFilter(and);
 

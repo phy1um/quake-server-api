@@ -6,7 +6,6 @@ var bodyParser = require('body-parser');
 // USE THIS ->
 //var rateLimit = require('express-rate-limit');
 
-const index = require('./routes/index');
 const iplist = require('./server/iplist');
 const serverdata = require('./server/q3data');
 const Matcher = require('./server/filter');
@@ -87,6 +86,7 @@ setInterval(() => {
 	}, 5000);
 
 
+const index = require('./routes/index').withServerData(serverData);
 app.use("/", index);
 const api = require('./routes/api').withServerData(serverData);
 app.use("/api", api);

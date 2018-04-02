@@ -4,6 +4,7 @@ html, body {
 	padding:0;
 	overflow-x: hidden;
 	width:100%;
+    color: black;
 }
 
 nav {
@@ -20,8 +21,8 @@ nav {
 }
 
 .links {
-	background: #aaa;
-	height:40px;
+    text-align: right;
+	background: #222;
 	font-size: 16pt;
 }
 
@@ -37,19 +38,20 @@ nav a {
 }
 
 
-
-
 table {
 	table-layout: fixed;
 	width: 100%;
 	border-collapse: collapse;
-	border: 3px solid purple;
 }
 
 th, td {
 	padding-left: 10px;
 	padding-right: 10px;
 	text-align: center;
+}
+
+table .even {
+    background-color:#ddd;
 }
 
 table th::nth-child(1) {
