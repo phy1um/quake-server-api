@@ -2,7 +2,12 @@
   "ExpandedNodes": [
     "",
     "\\bin",
+    "\\public",
+    "\\public\\css",
+    "\\public\\js",
+    "\\routes",
     "\\server"
   ],
+  "SelectedNode": "\\server\\q3master.js",
   "PreviewInSolutionExplorer": false
 }

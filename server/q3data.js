@@ -157,11 +157,12 @@ function updateData (ip, port, rules, players) {
 	doc.port = port;
 	doc.filteredPlayers = {};
 	q3json.updateServerInfo(doc);
-	if(doc.location === undefined) {
+    if (doc.location === undefined) {
+        doc.location = locate.unknown;
 		locate.findServer(doc, (err, loc) => {
 			if(err) {
 				console.error(err);
-				doc.location = locate.null;
+                doc.location = locate.unknown;
 			}
 			else {
 				doc.location = loc;
