@@ -11,7 +11,7 @@ const STAT_BUSY = 2;
 
 var OOB = Buffer.alloc(4, 0xff);
 var getStatusMsg = Buffer.from("getstatus");
-getStatusMsg = Buffer.concat([OOB, getStatusMsg], OOB.length + 
+getStatusMsg = Buffer.concat([OOB, getStatusMsg], OOB.length +
 	getStatusMsg.length);
 var getInfoMsg = Buffer.from("getinfo");
 getInfoMsg = Buffer.concat([OOB, getInfoMsg], OOB.length + getInfoMsg.length);
@@ -63,7 +63,7 @@ ServerData.prototype.getWorkingArray = function() {
 	var out = [];
 	for(let key in this.data) {
 		let d = this.data[key];
-		out.push(clone(d));	
+		out.push(clone(d));
 	}
 	return out;
 };
@@ -91,7 +91,7 @@ function ServerData(ipList) {
 	this.lastUpdate = -1;
 	this.data = {};
 	this.socket = dgram.createSocket('udp4');
-	this.socket.on('error', 
+	this.socket.on('error',
 		(err) => {
 			console.error("Error in socket: ");
 			console.error(this.socket);
@@ -100,7 +100,7 @@ function ServerData(ipList) {
 	this.socket.on('message', (msg, rinfo) => {
 		processMessage.call(this, msg, rinfo);
 	});
-	this.socket.parSvData= this; 
+	this.socket.parSvData= this;
 	this.stat = STAT_READY;
 	//console.dir(this.socket);
 
@@ -110,10 +110,10 @@ function ServerData(ipList) {
 var data = {
 	// Export a simple constructor
 	from: function(ipList) {
-		return new ServerData(ipList);	
+		return new ServerData(ipList);
 	},
 
-	
+
 };
 
 
@@ -133,7 +133,7 @@ function processMessage(msg, rinfo) {
 	for(let i = 2; i < lines.length; i++) {
 		if(lines[i].length > 1) {
 			var playerInfo = lines[i].split(" ");
-			playerList.push({name:playerInfo[2], 
+			playerList.push({name:playerInfo[2],
 				score:parseInt(playerInfo[0])});
 		}
 	}
@@ -148,8 +148,8 @@ function processMessage(msg, rinfo) {
  *  is Redis overkill?
  */
 function updateData (ip, port, rules, players) {
-	var key = ip + ":" + port;
-	var doc = this.getDocument(key);
+	const key = ip + ":" + port;
+	let doc = this.getDocument(key);
 	//updateServerDataInfo(doc, rules);
 	doc.players = players;
 	doc.rules = rules;
@@ -160,11 +160,12 @@ function updateData (ip, port, rules, players) {
 	if(doc.location === undefined) {
 		locate.findServer(doc, (err, loc) => {
 			if(err) {
-				console.error(err);
+				//console.error(err);
 				doc.location = locate.null;
 			}
 			else {
 				doc.location = loc;
+                locate.toFile(doc);
 			}
 		});
 	}
