@@ -2,10 +2,17 @@ const path = require('path');
 const matcher = require(path.join(__dirname, '../server/filter.js'));
 module.exports = { withServerData: function(serverData) {
 
+    const query_check = (process.env.QUERY_REQUIRE === "true");
 	const router = require('express').Router();
 	router.get("/list", function(req, res, next) {
 		try {
-			let match = matcher.fromQuery(req.query);
+            let match = matcher.fromQuery(req.query);
+            if (match.filters.length <= 0 && query_check) {
+                //console.log("No query in /list request");
+                return res.json({
+                    "error": "You must supply a valid query to filter results"
+                });
+            }
 			console.dir(req.query);
 			let servers = match.process(serverData)
 			let date = new Date();

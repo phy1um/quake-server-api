@@ -1,14 +1,14 @@
 doctype html
 html
-	head
-		title Q3A Server Browser
-		link(rel='stylesheet', href='/css/style.css')
-		block scripts
-	body(onload="pageload()")
-		nav
-			.titlebar.right cpma utils
-			.links
-				a(href="/browser") servers
-				a(href="/configs") configs
-
-		block content 
+    head
+        title Q3A Server Browser
+        link(rel='stylesheet', href='/css/style.css')
+        link(rel='stylesheet' href='https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css')
+        script(src="https://code.jquery.com/jquery-1.12.4.js")
+        block scripts
+    body(onload="pageload()")
+        nav
+            .links
+                a(href="/browser") servers
+                a(href="/configs") configs
+        block content 

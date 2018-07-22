@@ -4,11 +4,15 @@ const request = require('request');
 const country = require(path.join(__dirname, "./country.js"));
 const config = require(path.join(__dirname, '../secret_config'));
 
+const COUNTRY_UNKNOWN = {
+    countryName: "Unknown",
+    countryCode: "??",
+};
 // search object for key containing the characters 'location' and use the
 //  value at matching keys as argument to cb()
 function withLocationProperty(o, cb) {
     for(let key in o) {
-        let i = key.toUpperCase().indexOf("LOCATION");
+        let i = key.toUpperCase().indexOf("LOC");
         if(i >= 0) {
             cb(undefined, o[key]);
             return;
@@ -18,11 +22,14 @@ function withLocationProperty(o, cb) {
 
 // go from a document to a country location
 function locateServerFromDoc(doc, cb) {
-    const out = {countryName: "Unknown", countryCode: "UK"};
-    withLocationProperty(doc.rules, (err, value) => {
-        if(err) {
-            cb(err);
-        }
+    const out = {
+        countryName: COUNTRY_UNKNOWN.countryName,
+        countryCode: COUNTRY_UNKNOWN.countryCode
+    };
+	withLocationProperty(doc.rules, (err, value) => {
+		if(err) {
+			return cb(err);
+		}
 
         const parts = value.split(",");
         for(let i = 0; i < parts.length; i++) {
@@ -52,10 +59,16 @@ function locateServerFromDoc(doc, cb) {
 }
 
 const api_key = process.env.GEO_KEY || config.GEO_KEY;
+const api_no = (process.env.NO_GEO === "true");
+if (process.env.NO_GEO == "true") {
+    console.log("GEOLOCATE disabled");
+}
+
 const api_base = "http://api.ipstack.com";
+
 function geolocate(ip, cb) {
     if(process.env.NO_GEO) {
-        return cb(new Error(`No geolocation requests allowed`));
+        return cb(undefined, COUNTRY_UNKNOWN);
     }
     const target = `${api_base}/${ip}?access_key=${api_key}`;
     request(target, function(err, res, body) {
@@ -135,8 +148,5 @@ function writeLocationToFile(doc) {
 module.exports = {
     findServer: locateServerFromDoc,
     toFile: writeLocationToFile,
-    unknown: {
-        countryName: "UNKNOWN",
-        countryCode: "??"
-    }
+    unknown: COUNTRY_UNKNOWN,
 };

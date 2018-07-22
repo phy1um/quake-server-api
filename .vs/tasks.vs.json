@@ -1,0 +1,15 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskName": "task-q3-server-api",
+      "appliesTo": "/",
+      "type": "launch"
+    },
+    {
+      "taskName": "task-q3-server-api",
+      "appliesTo": "/",
+      "type": "launch"
+    }
+  ]
+}

@@ -1,21 +1,25 @@
 extends layout.pug
 
 block content
-	.browser
-		table#browser-table
-			tr
-				th Country
-				th Name
-				th Game
-				th Players
-				th Mode
-				th Map
-			
-			for server in servers
-				tr
-					td server.location
-					td server.info.serverName
-					td server.info.gameDir
-					td server.info.players
-					td server.info.gameTypeShort
-					td aerowalk
+    .browser
+        table#browser-table.display
+            thead
+                tr
+                    th Country
+                    th Name
+                    th Game
+                    th Players
+                    th Mode
+                    th Map
+            tbody
+                for server in servers
+                    tr
+                        td=server.location.countryName
+                        td=server.info.serverName
+                        td=server.info.gameDir
+                        td=server.info.players
+                        td=server.info.gameTypeShort
+                        td=server.info.map
+    
+    script(src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js")
+    script(src="/js/dt.js")
