@@ -39,7 +39,7 @@ const filter = {
 
 	// boolean spaghetti
 	noFull: function(e) {
-		return(e.info && e.info.players !== undefined && e.info.maxPlayers 
+		return(e.info && e.info.players !== undefined && e.info.maxPlayers
 			&& (e.info.players < e.info.maxPlayers));
 	},
 	noEmpty: function(e) {
@@ -122,7 +122,7 @@ function fromQuery(q) {
 	let m = new Matcher();
 	if(q !== undefined) {
 		if(q.name) {
-			const and = makeComboFilter(q.name.split("|"), 
+			const and = makeComboFilter(q.name.split("|"),
 						filter.withName);
 			m.addFilter(and);
 		}
@@ -154,7 +154,7 @@ function fromQuery(q) {
 		else if(q.empty === "only") {
 			m.addFilter(filter.not(filter.noEmpty));
 		}
-		
+
 	}
 	return m;
 }

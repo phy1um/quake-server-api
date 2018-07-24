@@ -8,7 +8,7 @@ const COUNTRY_UNKNOWN = {
     countryName: "Unknown",
     countryCode: "??",
 };
-// search object for key containing the characters 'location' and use the
+// search object for key containing the characters 'loc' and use the
 //  value at matching keys as argument to cb()
 function withLocationProperty(o, cb) {
     for(let key in o) {
@@ -30,7 +30,9 @@ function locateServerFromDoc(doc, cb) {
 		if(err) {
 			return cb(err);
 		}
+        // TODO: implement x-* field location identification
 
+        // first test for country names AND US states
         const parts = value.split(",");
         for(let i = 0; i < parts.length; i++) {
             const test = parts[i].trim();
@@ -59,15 +61,17 @@ function locateServerFromDoc(doc, cb) {
 }
 
 const api_key = process.env.GEO_KEY || config.GEO_KEY;
+// test for disabled geolocation
 const api_no = (process.env.NO_GEO === "true");
 if (process.env.NO_GEO == "true") {
     console.log("GEOLOCATE disabled");
 }
 
-const api_base = "http://api.ipstack.com";
 
+const api_base = "http://api.ipstack.com";
+// make geolocation requests from given IP to ipstack
 function geolocate(ip, cb) {
-    if(process.env.NO_GEO) {
+    if(api_no) {
         return cb(undefined, COUNTRY_UNKNOWN);
     }
     const target = `${api_base}/${ip}?access_key=${api_key}`;
@@ -93,15 +97,18 @@ function geolocate(ip, cb) {
 }
 
 
+// make a location cache so that we don't blow out our ipstack allowence
 const cache = "serverLoc.cache";
-// refresh every 30 days
+// expire entries after 30 days
 const TTL = 30 * 24 * 60 * 60;
 let locationCache = {};
 
+// try to load a cache from file
 function loadLocationCache() {
     const now = new Date() / 1000;
     fs.readFile(cache, function(err, data) {
         if(err) {
+            // catch non existent file, this isn't a throw-worthy error
             if(err.code === "ENOENT") {
                 return console.log("No location cache file exists");
             }
@@ -119,6 +126,7 @@ function loadLocationCache() {
     });
 }
 
+// write cache to file as JSON
 function writeLocationCache() {
     console.log("Writing location cache");
     const out = JSON.stringify(locationCache, null, 0);
@@ -127,13 +135,14 @@ function writeLocationCache() {
     });
 }
 
-// load from file on first load
+// load from file on run
 loadLocationCache();
 // write to file at some interval
 setInterval(writeLocationCache, config.CACHE_WRITE_RATE || 60000);
 
+// TODO: refactor name
 function writeLocationToFile(doc) {
-    // read JSON from file, insert document, write back to file
+    // write document's location as COPY to cache
     const now = new Date() / 1000;
     const l = {
         countryName: doc.location.countryName,

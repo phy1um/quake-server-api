@@ -3,6 +3,7 @@ function isIp(addr) {
 	return true;
 }
 
+// construct an IPList from fixed array (copies array)
 function StaticIpList(array) {
 	this.array = [];
 	// verify elements of array are "ip:port" pairs!
@@ -31,10 +32,12 @@ function StaticIpList(array) {
 	}
 }
 
+// only relevant to dynamic IPLists
 StaticIpList.prototype.refresh = function() {
 	return;
 }
 
+// basic iterator
 StaticIpList.prototype.foreach = function(cb) {
 	for(let k in this.array) {
 		let e = this.array[k];

@@ -44,9 +44,6 @@ module.exports = {
 };
 
 
-
-
-
 const shortNames = {
 	"Deathmatch": "FFA",
 	"Team Deathmatch": "TDM",

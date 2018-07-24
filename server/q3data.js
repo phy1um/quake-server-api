@@ -9,6 +9,8 @@ const STAT_UPDATING = 1;
 const STAT_ERR = -1;
 const STAT_BUSY = 2;
 
+
+// udp byte-level data for making requests to servers
 var OOB = Buffer.alloc(4, 0xff);
 var getStatusMsg = Buffer.from("getstatus");
 getStatusMsg = Buffer.concat([OOB, getStatusMsg], OOB.length +
@@ -53,9 +55,11 @@ ServerData.prototype.update = function() {
 };
 
 
+// SLOW
 function clone(data) {
 	return JSON.parse(JSON.stringify(data));
 };
+
 /**
  * Get a "working copy" array of all servers currently in this ServerData
  */
@@ -102,7 +106,6 @@ function ServerData(ipList) {
 	});
 	this.socket.parSvData= this;
 	this.stat = STAT_READY;
-	//console.dir(this.socket);
 
 }
 
